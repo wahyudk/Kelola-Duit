@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mencoba/screens/create_screen.dart';
+import 'package:mencoba/screens/update_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,8 +18,31 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyhomePage extends StatelessWidget {
+class MyhomePage extends StatefulWidget {
   const MyhomePage({super.key});
+
+  @override
+  State<MyhomePage> createState() => _MyhomePageState();
+}
+
+class _MyhomePageState extends State<MyhomePage> {
+
+showAlertDialog(BuildContext context) {
+  Widget okButton = FloatingActionButton(
+    child: Text('Ya'),
+    onPressed: () {}
+  );
+    
+      AlertDialog alertDialog = AlertDialog(
+        title: Text('Peringatan !'),
+        content: Text('Yakin akan menghapus?'),
+        actions: [okButton]
+      );
+
+      showDialog(context: context, builder: (BuildContext context ){
+        return alertDialog;
+      });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +54,12 @@ class MyhomePage extends StatelessWidget {
         ), 
       backgroundColor: Colors.grey[400],
       actions: [
+        IconButton (
+          icon: Icon(Icons.add),onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateScreen()));
+          },),
         Padding(
           padding: EdgeInsets.only(right: 20),
-          child: Icon(Icons.add),
           )
           ]
       ),
@@ -53,40 +81,19 @@ class MyhomePage extends StatelessWidget {
               color: Colors.blue),
               trailing: Wrap(
                 children: [
-                  Icon(Icons.edit, color: Colors.grey),
+                  
+                  IconButton(onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateScreen()));
+                  },  icon: Icon(Icons.edit), color: Colors.grey),
                   SizedBox(width: 20),
-                  Icon(Icons.delete, color: Colors.red)
-                  ]
-              )
-            ),
-            
-            ListTile(
-              title: Text('Makan'),
-              subtitle: Text('20.000'),
-              leading: Icon(Icons.attach_money,
-              color: Colors.blue),
-              trailing: Wrap(
-                children: [
-                  Icon(Icons.edit, color: Colors.grey),
-                  SizedBox(width: 20),
-                  Icon(Icons.delete, color: Colors.red)
-                  ]
-              )
-            ),
+                  
+                  IconButton(onPressed: () {
+                    showAlertDialog(context);
+                  }, icon: Icon(Icons.delete, color: Colors.red))
 
-            ListTile(
-              title: Text('Minum'),
-              subtitle: Text('10.000'),
-              leading: Icon(Icons.attach_money,
-              color: Colors.blue),
-              trailing: Wrap(
-                children: [
-                  Icon(Icons.edit, color: Colors.grey),
-                  SizedBox(width: 20),
-                  Icon(Icons.delete, color: Colors.red)
                   ]
               )
-            )
+            ),
           ]
         )
           ),

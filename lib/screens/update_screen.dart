@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class CreateScreen extends StatelessWidget {
-  const CreateScreen({super.key});
+class UpdateScreen extends StatelessWidget {
+  const UpdateScreen({super.key});
 
   final int _value = 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create',
+      appBar: AppBar(title: Text('Update',
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 20)
