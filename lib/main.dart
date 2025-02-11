@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mencoba/model/transaction.dart';
 import 'package:mencoba/screens/create_screen.dart';
 import 'package:mencoba/screens/update_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(TransactionAdapter());
+  await Hive.openBox<Transaction>('transactions');
+
   runApp(MyApp());
 }
 
@@ -26,77 +34,95 @@ class MyhomePage extends StatefulWidget {
 }
 
 class _MyhomePageState extends State<MyhomePage> {
+  final Box<Transaction> box = Hive.box<Transaction>('transactions');
 
-showAlertDialog(BuildContext context) {
-  Widget okButton = FloatingActionButton(
-    child: Text('Ya'),
-    onPressed: () {}
-  );
-    
-      AlertDialog alertDialog = AlertDialog(
+  void showAlertDialog(BuildContext context, int index) {
+    Widget okButton = FloatingActionButton(
+        child: Text('Ya'),
+        onPressed: () {
+          box.deleteAt(index);
+          Navigator.pop(context);
+        });
+
+    AlertDialog alertDialog = AlertDialog(
         title: Text('Peringatan !'),
         content: Text('Yakin akan menghapus?'),
-        actions: [okButton]
-      );
+        actions: [okButton]);
 
-      showDialog(context: context, builder: (BuildContext context ){
-        return alertDialog;
-      });
-}
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alertDialog;
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("HOME KELOLA DUIT", 
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 20)
-        ), 
-      backgroundColor: Colors.grey[400],
-      actions: [
-        IconButton (
-          icon: Icon(Icons.add),onPressed: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateScreen()));
-          },),
-        Padding(
-          padding: EdgeInsets.only(right: 20),
-          )
-          ]
-      ),
-      
-      body: SafeArea(
-        child: Column(
-          children: [
+      appBar: AppBar(
+          title: Text("HOME KELOLA DUIT",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          backgroundColor: Colors.grey[400],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => CreateScreen()));
+              },
 
-            SizedBox(height: 10),
-            
-            Text('Total Pemasukan : Rp 200.000'),
-            SizedBox(height: 10),
-            Text('Total Pengeluaran : Rp 50.000'),
-
-            ListTile(
-              title: Text('Bensin'),
-              subtitle: Text('20.000'),
-              leading: Icon(Icons.attach_money,
-              color: Colors.blue),
-              trailing: Wrap(
-                children: [
-                  
-                  IconButton(onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => UpdateScreen()));
-                  },  icon: Icon(Icons.edit), color: Colors.grey),
-                  SizedBox(width: 20),
-                  
-                  IconButton(onPressed: () {
-                    showAlertDialog(context);
-                  }, icon: Icon(Icons.delete, color: Colors.red))
-
-                  ]
-              )
             ),
-          ]
-        )
-          ),
+            Padding(
+              padding: EdgeInsets.only(right: 20),
+            )
+          ]),
+          
+      body: SafeArea(
+        child: ValueListenableBuilder(
+          valueListenable: box.listenable(),
+          builder: (context, Box<Transaction> transactionsBox, _) {
+            if (transactionsBox.isEmpty) {
+              return Center(child: Text('Belum ada transaksi'));
+            }
+
+            return ListView.builder(
+              itemCount: transactionsBox.length,
+              itemBuilder: (context, index) {
+                final transaction = transactionsBox.getAt(index);
+
+                return ListTile(
+                  title: Text(transaction!.nama),
+                  subtitle: Text('Rp ${transaction.total.toStringAsFixed(0)}'),
+                  leading: Icon(
+                    Icons.attach_money,
+                    color: transaction.isPemasukan ? Colors.green : Colors.red,
+                  ),
+                  trailing: Wrap(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => UpdateScreen(transaction: transaction, index: index,),
+                          ));
+                        },
+                        icon: Icon(Icons.edit, color: Colors.grey),
+                      ),
+                      SizedBox(width: 20),
+                      IconButton(
+                        onPressed: () {
+                          showAlertDialog(
+                              context, index);
+                        },
+                        icon: Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
     );
   }
 }
