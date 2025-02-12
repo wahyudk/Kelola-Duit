@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mencoba/boxes.dart';
 import 'package:mencoba/model/transaction.dart';
 
 
 class UpdateScreen extends StatefulWidget {
   final int index;
   final Transaction transaction;
+
   const UpdateScreen({super.key, required this.index, required this.transaction});
 
   @override
@@ -14,8 +14,8 @@ class UpdateScreen extends StatefulWidget {
 }
 
 class _UpdateScreenState extends State<UpdateScreen> {
-  late TextEditingController _namaController = TextEditingController();
-  late TextEditingController _totalController = TextEditingController();
+  late TextEditingController _namaController;
+  late TextEditingController _totalController;
   bool? _isPemasukan;
 
   @override
@@ -36,32 +36,35 @@ class _UpdateScreenState extends State<UpdateScreen> {
   void _updateTransaction() async {
     String nama = _namaController.text.trim();
     String totalText = _totalController.text.trim();
-    double total = double.tryParse(totalText) ?? 0;
   
 
-  if (nama.isEmpty || totalText.isEmpty || _isPemasukan){
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('harap isi Semua data'))
-    );
-    return;
+    if (nama.isEmpty || totalText.isEmpty || _isPemasukan == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('harap isi Semua data')));
+      return;
     }
 
-    final box = Hive.box<Transaction>('transactions'); 
-    final updatedTransaction = Transaction(
-    nama: nama,
-    total: total,
-    isPemasukan: _isPemasukan ?? false
-);
+    double total = double.tryParse(totalText) ?? 0;
 
-    if (widget.index >= 0 && widget.index < box.length) {
-  box.putAt(widget.index, updatedTransaction);
-} else {
-  print("Error: Index tidak valid.");
-}
+    final updateTransaction = Transaction()
+      ..nama = nama
+      ..total = total
+      ..isPemasukan = _isPemasukan!;
+    
+        final box = Hive.box<Transaction>('transactions'); 
 
-    // box.putAt(widget.index, updatedTransaction);
-    Navigator.pop(context);
 
+if (widget.index >= 0 && widget.index < box.length) {
+  box.putAt(widget.index, updateTransaction);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Data berhasil diperbarui'))
+  );
+  Navigator.pop(context);
+  } else {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Error: Data tidak valid'))
+  );
+  }
   }
 
   @override

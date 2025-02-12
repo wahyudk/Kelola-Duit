@@ -11,4 +11,5 @@ class Transaction extends HiveObject{
 
   @HiveField(2)
   late bool isPemasukan = true;
+
 }
