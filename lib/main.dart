@@ -21,6 +21,7 @@
     Widget build(BuildContext context) {
       return const MaterialApp(
         title: 'Kelola Duit',
+        debugShowCheckedModeBanner: false,
         home: MyhomePage(),
       );
     }
